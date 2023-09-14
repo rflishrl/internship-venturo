@@ -160,7 +160,7 @@ if (isset($_GET['tahun']) && $_GET['tahun'] != "") {
                                 endforeach;
                                 ?>
                                 <tr>
-                                    <td class="table-dark" colspan="1"><b>Total Harga</b></td>
+                                    <td class="table-dark" colspan="1"><b>Total Penjualan</b></td>
                                     <td class="table-dark" style="text-align: right;" colspan="13"><b><?= $totalSemuaItem ?></b></td>
                                 </tr>
                             <?php else : ?>
