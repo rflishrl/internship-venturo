@@ -29,6 +29,15 @@ if (isset($_GET['tahun']) && $_GET['tahun'] != "") {
     foreach ($menu as $key => $value) {
         $totalSemuaItem += $menu[$key]['totalHarga'];
     }
+
+    function sumVertical($array, $column)
+    {
+        $sum = 0;
+        foreach ($array as $row) {
+            $sum += $row[$column];
+        }
+        return $sum;
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -46,7 +55,7 @@ if (isset($_GET['tahun']) && $_GET['tahun'] != "") {
             font-size: 11px;
         }
     </style>
-    <title>TES - Venturo</title>
+    <title>TES - Venturo Camp Tahap 2</title>
 </head>
 
 <body>
@@ -160,8 +169,22 @@ if (isset($_GET['tahun']) && $_GET['tahun'] != "") {
                                 endforeach;
                                 ?>
                                 <tr>
-                                    <td class="table-dark" colspan="1"><b>Total Penjualan</b></td>
-                                    <td class="table-dark" style="text-align: right;" colspan="13"><b><?= $totalSemuaItem ?></b></td>
+                                <tr>
+                                    <td class="table-dark" colspan="1"><b>Total Harga</b></td>
+                                    <?php
+                                    $totalBulan = array_fill(0, 12, 0); // Inisialisasi array totalBulan
+                                    foreach ($menu as $key => $value) {
+                                        for ($i = 0; $i < 12; $i++) {
+                                            $totalBulan[$i] += $value['value'][$i];
+                                        }
+                                    }
+                                    foreach ($totalBulan as $index => $total) {
+                                        echo '<td class="table-dark" style="text-align: right;"><b>' . ($total != 0 ? $total : '') . '</b></td>';
+                                        if ($index == 11) {
+                                            echo '<td class="table-dark" style="text-align: right;"><b>' . array_sum($totalBulan) . '</b></td>';
+                                        }
+                                    }
+                                    ?>
                                 </tr>
                             <?php else : ?>
                             <?php endif; ?>
