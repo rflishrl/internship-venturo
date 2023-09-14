@@ -43,7 +43,7 @@ if (isset($_GET['tahun']) && $_GET['tahun'] != "") {
     <style>
         td,
         th {
-            font-size: 14px;
+            font-size: 11px;
         }
     </style>
     <title>TES - Venturo</title>
@@ -52,7 +52,7 @@ if (isset($_GET['tahun']) && $_GET['tahun'] != "") {
 <body>
     <div class="container-fluid">
         <div class="card" style="margin: 2rem 0rem;">
-            <div class="card-header" style="font-weight: 700;">
+            <div class="card-header">
                 Venturo - Laporan penjualan tahunan per menu
             </div>
             <div class="card-body">
