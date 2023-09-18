@@ -10,24 +10,36 @@ if (isset($_GET['tahun']) && $_GET['tahun'] != "") {
         $menu[$key]['value'] = $values;
         $menu[$key]['totalHarga'] = 0;
     }
-    foreach ($transaksi as $key => $value) {
-        $valueTrans = $value;
-        $harga = $value['total'];
-        $dateFormat = DateTime::createFromFormat("Y-m-d", $value['tanggal']);
+
+    // Variabel total harga makanan dan minuman
+    $totalHargaMakanan = array_fill(0, 12, 0);
+    $totalHargaMinuman = array_fill(0, 12, 0);
+
+    foreach ($transaksi as $key => $valueTrans) {
+        $harga = $valueTrans['total'];
+        $dateFormat = DateTime::createFromFormat("Y-m-d", $valueTrans['tanggal']);
         $bulan = $dateFormat->format("n");
 
-        foreach ($menu as $key => $value) {
+        foreach ($menu as $keyMenu => $valueMenu) {
             $totalSemua = 0;
-            if ($value['menu'] === $valueTrans['menu']) {
-                $menu[$key]['value'][$bulan - 1] += $valueTrans['total'];
-                $totalSemua += $valueTrans['total'];
+            if ($valueMenu['menu'] === $valueTrans['menu']) {
+                $menu[$keyMenu]['value'][$bulan - 1] += $harga;
+                $totalSemua += $harga;
+
+                // Pisahkan perhitungan total harga makanan dan minuman
+                if ($valueMenu['kategori'] === "makanan") {
+                    $totalHargaMakanan[$bulan - 1] += $harga;
+                } elseif ($valueMenu['kategori'] === "minuman") {
+                    $totalHargaMinuman[$bulan - 1] += $harga;
+                }
             }
-            $menu[$key]['totalHarga'] += $totalSemua;
+            $menu[$keyMenu]['totalHarga'] += $totalSemua;
         }
     }
+
     $totalSemuaItem = 0;
     foreach ($menu as $key => $value) {
-        $totalSemuaItem += $menu[$key]['totalHarga'];
+        $totalSemuaItem += $value['totalHarga'];
     }
 
     function sumVertical($array, $column)
@@ -123,8 +135,18 @@ if (isset($_GET['tahun']) && $_GET['tahun'] != "") {
                             </thead>
                             <tbody>
                                 <?php if (isset($_GET['tahun']) && $_GET['tahun'] != "") : ?>
+                                    <!-- Kode untuk menampilkan total harga makanan perbulan -->
                                     <tr>
-                                        <td class="table-secondary" colspan="14"><b>Makanan</b></td>
+                                        <td class="table-secondary"><b>Total Harga Makanan</b></td>
+                                        <?php
+                                        foreach ($totalHargaMakanan as $total) {
+                                            $totalFormatted = ($total != 0) ? 'Rp ' . number_format($total, 0, ',', '.') : '-';
+                                            echo '<td class="table-secondary" style="text-align: right;"><b>' . $totalFormatted . '</b></td>';
+                                        }
+                                        $totalMakananFormatted = array_sum($totalHargaMakanan);
+                                        $totalMakananFormatted = ($totalMakananFormatted != 0) ? 'Rp ' . number_format($totalMakananFormatted, 0, ',', '.') : '-';
+                                        echo '<td class="table-secondary" style="text-align: right;"><b>' . $totalMakananFormatted . '</b></td>';
+                                        ?>
                                     </tr>
                                     <!-- Kode untuk menampilkan data makanan -->
                                     <?php
@@ -136,12 +158,12 @@ if (isset($_GET['tahun']) && $_GET['tahun'] != "") {
                                                 <!-- Kode untuk menampilkan nilai makanan per bulan -->
                                                 <?php
                                                 foreach ($value['value'] as $kunci => $nilai) :
-                                                    $nilaiFormatted = ($nilai != 0) ? number_format($nilai) : ''; // Format nilai dengan koma ribuan
+                                                    $nilaiFormatted = ($nilai != 0) ? 'Rp ' . number_format($nilai, 0, ',', '.') : '-';
                                                 ?>
                                                     <td style="text-align: right;"><?= $nilaiFormatted ?></td>
                                                 <?php
                                                 endforeach;
-                                                $totalHargaFormatted = number_format($value['totalHarga']); // Format total harga dengan koma ribuan
+                                                $totalHargaFormatted = ($value['totalHarga'] != 0) ? 'Rp ' . number_format($value['totalHarga'], 0, ',', '.') : '-';
                                                 ?>
                                                 <td style="text-align: right;"><b><?= $totalHargaFormatted ?></b></td>
                                             </tr>
@@ -149,24 +171,35 @@ if (isset($_GET['tahun']) && $_GET['tahun'] != "") {
                                         endif;
                                     endforeach;
                                     ?>
-                                    <!-- Kode untuk menampilkan data minuman -->
+                                    <!-- Kode untuk menampilkan total harga minuman perbulan -->
                                     <tr>
-                                        <td class="table-secondary" colspan="14"><b>Minuman</b></td>
+                                        <td class="table-secondary"><b>Total Harga Minuman</b></td>
+                                        <?php
+                                        foreach ($totalHargaMinuman as $total) {
+                                            $totalFormatted = ($total != 0) ? 'Rp ' . number_format($total, 0, ',', '.') : '-';
+                                            echo '<td class="table-secondary" style="text-align: right;"><b>' . $totalFormatted . '</b></td>';
+                                        }
+                                        $totalMinumanFormatted = array_sum($totalHargaMinuman);
+                                        $totalMinumanFormatted = ($totalMinumanFormatted != 0) ? 'Rp ' . number_format($totalMinumanFormatted, 0, ',', '.') : '-';
+                                        echo '<td class="table-secondary" style="text-align: right;"><b>' . $totalMinumanFormatted . '</b></td>';
+                                        ?>
                                     </tr>
+                                    <!-- Kode untuk menampilkan data minuman -->
                                     <?php
                                     foreach ($menu as $key => $value) :
                                         if ($value['kategori'] === "minuman") :
                                     ?>
                                             <tr>
                                                 <td style="text-align: left;"><?= $menu[$key]['menu'] ?></td>
+                                                <!-- Kode untuk menampilkan nilai minuman per bulan -->
                                                 <?php
                                                 foreach ($value['value'] as $kunci => $nilai) :
-                                                    $nilaiFormatted = ($nilai != 0) ? number_format($nilai) : ''; // Format nilai dengan koma ribuan
+                                                    $nilaiFormatted = ($nilai != 0) ? 'Rp ' . number_format($nilai, 0, ',', '.') : '-';
                                                 ?>
                                                     <td style="text-align: right;"><?= $nilaiFormatted ?></td>
                                                 <?php
                                                 endforeach;
-                                                $totalHargaFormatted = number_format($value['totalHarga']); // Format total harga dengan koma ribuan
+                                                $totalHargaFormatted = ($value['totalHarga'] != 0) ? 'Rp ' . number_format($value['totalHarga'], 0, ',', '.') : '-';
                                                 ?>
                                                 <td style="text-align: right;"><b><?= $totalHargaFormatted ?></b></td>
                                             </tr>
@@ -185,10 +218,10 @@ if (isset($_GET['tahun']) && $_GET['tahun'] != "") {
                                             }
                                         }
                                         foreach ($totalBulan as $index => $total) {
-                                            $totalFormatted = ($total != 0) ? number_format($total) : ''; // Format total dengan koma
+                                            $totalFormatted = ($total != 0) ? 'Rp ' . number_format($total, 0, ',', '.') : ''; // Format total dengan koma
                                             echo '<td class="table-dark" style="text-align: right;"><b>' . $totalFormatted . '</b></td>';
                                             if ($index == 11) {
-                                                $totalSumFormatted = number_format(array_sum($totalBulan)); // Format total keseluruhan dengan koma
+                                                $totalSumFormatted = ($totalSemuaItem != 0) ? 'Rp ' . number_format($totalSemuaItem, 0, ',', '.') : '-';
                                                 echo '<td class="table-dark" style="text-align: right;"><b>' . $totalSumFormatted . '</b></td>';
                                             }
                                         }
